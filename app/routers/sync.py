@@ -19,6 +19,10 @@ def serialize_workout_item(item: Workout) -> dict:
         "status": item.status,
         "start_time": item.start_time,
         "end_time": item.end_time,
+        "scheduled_start_time": item.scheduled_start_time,
+        "scheduled_end_time": item.scheduled_end_time,
+        "actual_start_time": item.actual_start_time,
+        "actual_end_time": item.actual_end_time,
         "created_at": item.created_at,
         "updated_at": item.updated_at,
         "exercises": [
@@ -160,6 +164,10 @@ def replace_sync_payload(payload: SyncPayload, current_user: User = Depends(get_
             status=item.status,
             start_time=item.start_time,
             end_time=item.end_time,
+            scheduled_start_time=item.scheduled_start_time,
+            scheduled_end_time=item.scheduled_end_time,
+            actual_start_time=item.actual_start_time,
+            actual_end_time=item.actual_end_time,
             created_at=item.created_at,
             updated_at=item.updated_at,
         )

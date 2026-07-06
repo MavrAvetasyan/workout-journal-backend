@@ -89,6 +89,10 @@ class WorkoutBase(BaseModel):
     status: str = Field(pattern="^(planned|active|completed|cancelled)$")
     start_time: datetime | None = None
     end_time: datetime | None = None
+    scheduled_start_time: datetime | None = None
+    scheduled_end_time: datetime | None = None
+    actual_start_time: datetime | None = None
+    actual_end_time: datetime | None = None
     exercises: list[WorkoutExerciseCreate] = Field(default_factory=list)
 
 
