@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from . import models  # noqa: F401
-from .config import API_PREFIX, STATIC_DIR
+from .config import API_PREFIX, CORS_ORIGINS, STATIC_DIR
 from .database import Base, engine
 from .routers import auth, exercises, measurements, sync, workouts
 
@@ -20,7 +20,7 @@ app = FastAPI(title="Workout Journal API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS or ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

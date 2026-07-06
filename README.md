@@ -2,23 +2,26 @@
 
 Отдельный backend-репозиторий для приложения журнала тренировок.
 
-## Стек
+## Что уже есть
 
-- Python 3.12
-- FastAPI
-- SQLAlchemy
+- FastAPI API
 - PostgreSQL
-- Docker / Docker Compose
+- Dockerfile
+- `docker-compose.yaml` для локальной разработки
+- `docker-compose.server.yaml` для своего сервера
+- GitHub Actions для сборки и публикации образа в GHCR
+- JWT-авторизация
+- sync endpoint для Flutter-клиента
 
-## Что внутри
+## API
 
-- регистрация и логин
-- профиль текущего пользователя
-- CRUD для упражнений
-- CRUD для замеров
-- CRUD для тренировок
-- полный sync-эндпоинт для клиента
-- healthcheck
+После запуска доступны:
+
+- `http://127.0.0.1:8000/health`
+- `http://127.0.0.1:8000/docs`
+- `http://127.0.0.1:8000/api/auth/register`
+- `http://127.0.0.1:8000/api/auth/login`
+- `http://127.0.0.1:8000/api/sync`
 
 ## Локальный запуск без Docker
 
@@ -29,15 +32,9 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-API будет доступен на:
+Если `DATABASE_URL` не задан, backend использует SQLite в `data/app.db`.
 
-- `http://127.0.0.1:8000`
-- `http://127.0.0.1:8000/docs`
-- `http://127.0.0.1:8000/health`
-
-По умолчанию без переменной `DATABASE_URL` используется SQLite в `data/app.db`.
-
-## Docker Compose
+## Локальный запуск через Docker
 
 ```powershell
 docker compose up --build
@@ -49,19 +46,106 @@ docker compose up --build
 - Swagger: `http://127.0.0.1:8000/docs`
 - Postgres: `localhost:5432`
 
+## Что лежит в репозитории
+
+- `Dockerfile` — сборка backend-контейнера
+- `docker-compose.yaml` — локальная разработка
+- `docker-compose.server.yaml` — запуск на своем сервере из GHCR-образа
+- `.env.example` — пример env для локальной разработки
+- `.env.server.example` — пример env для своего сервера
+- `scripts/server-redeploy.sh` — обновление контейнеров на сервере
+
+## GHCR и GitHub Actions
+
+Workflow `.github/workflows/publish-ghcr.yml`:
+
+1. собирает Docker-образ
+2. пушит его в GitHub Container Registry
+3. обновляет теги `latest`, `main` и `sha-*`
+
+Итоговый образ:
+
+```text
+ghcr.io/mavravetasyan/workout-journal-backend:latest
+```
+
+## Запуск на своем сервере
+
+### 1. Подготовить сервер
+
+Нужно установить:
+
+- Docker
+- Docker Compose plugin
+
+### 2. Скопировать backend-репозиторий на сервер
+
+```bash
+git clone https://github.com/MavrAvetasyan/workout-journal-backend.git
+cd workout-journal-backend
+```
+
+### 3. Создать `.env.server`
+
+Можно взять за основу `.env.server.example`.
+
+Минимум нужно заполнить:
+
+- `BACKEND_IMAGE`
+- `POSTGRES_DB`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+- `SECRET_KEY`
+- `CORS_ORIGINS`
+
+### 4. Один раз войти в GHCR на сервере
+
+```bash
+echo <github_token> | docker login ghcr.io -u <github_username> --password-stdin
+```
+
+Токену обычно нужны права на чтение пакетов.
+
+### 5. Запустить контейнеры
+
+```bash
+docker compose -f docker-compose.server.yaml up -d
+```
+
+### 6. Обновлять backend после новых пушей
+
+```bash
+./scripts/server-redeploy.sh
+```
+
+Этот скрипт:
+
+1. подтягивает свежий образ из GHCR
+2. перезапускает backend и postgres
+3. чистит старые dangling images
+
 ## Переменные окружения
+
+### Основные
 
 - `DATABASE_URL`
 - `SECRET_KEY`
-- `STATIC_DIR` — опционально, если нужно раздавать отдельную статику
+- `CORS_ORIGINS`
+- `STATIC_DIR`
 
-## GHCR
+### Для server compose
 
-В репозитории есть GitHub Actions workflow, который:
+- `BACKEND_IMAGE`
+- `BACKEND_PORT`
+- `POSTGRES_DB`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
 
-- собирает Docker-образ
-- публикует его в GitHub Container Registry
+## Что дальше
 
-Образ будет доступен по пути вида:
+Следующие шаги по проекту:
 
-`ghcr.io/<owner>/workout-journal-backend`
+1. подключить Flutter mobile к постоянному backend
+2. перевести вход с пароля на код по email
+3. добавить SMTP и одноразовые коды верификации
+4. настроить автообновление на своем сервере
