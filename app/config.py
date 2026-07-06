@@ -35,3 +35,14 @@ CORS_ORIGINS = parse_csv_env(
         "http://127.0.0.1:8000,http://localhost:8000,http://127.0.0.1:3000,http://localhost:3000,https://mavravetasyan.github.io",
     )
 )
+LOGIN_CODE_TTL_MINUTES = int(os.getenv("LOGIN_CODE_TTL_MINUTES", "10"))
+LOGIN_CODE_LENGTH = int(os.getenv("LOGIN_CODE_LENGTH", "6"))
+LOGIN_CODE_RESEND_SECONDS = int(os.getenv("LOGIN_CODE_RESEND_SECONDS", "30"))
+LOGIN_CODE_MAX_ATTEMPTS = int(os.getenv("LOGIN_CODE_MAX_ATTEMPTS", "5"))
+DEBUG_AUTH_CODES = os.getenv("DEBUG_AUTH_CODES", "1") == "1"
+MAIL_PROVIDER = os.getenv("MAIL_PROVIDER", "log").strip().lower()
+MAIL_FROM = os.getenv("MAIL_FROM", "Workout Journal <no-reply@example.com>")
+MAIL_REPLY_TO = os.getenv("MAIL_REPLY_TO", "").strip()
+APP_NAME = os.getenv("APP_NAME", "Workout Journal").strip() or "Workout Journal"
+APP_LOGIN_URL = os.getenv("APP_LOGIN_URL", "").strip()
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "").strip()

@@ -4,11 +4,16 @@ import base64
 import hashlib
 import hmac
 import os
+import secrets
 from datetime import datetime, timedelta, timezone
 
 import jwt
 
-from .config import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, SECRET_KEY
+from .config import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, LOGIN_CODE_LENGTH, SECRET_KEY
+
+
+def utcnow() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 def hash_password(password: str) -> str:
@@ -32,7 +37,7 @@ def verify_password(password: str, password_hash: str) -> bool:
 
 
 def create_access_token(user_id: str, email: str) -> str:
-    now = datetime.now(timezone.utc)
+    now = utcnow()
     payload = {
         "sub": user_id,
         "email": email,
@@ -40,6 +45,22 @@ def create_access_token(user_id: str, email: str) -> str:
         "exp": now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     }
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def generate_login_code() -> str:
+    digits = "0123456789"
+    return "".join(secrets.choice(digits) for _ in range(LOGIN_CODE_LENGTH))
+
+
+def hash_login_code(email: str, code: str) -> str:
+    normalized_email = email.strip().lower()
+    payload = f"{normalized_email}:{code}".encode("utf-8")
+    return hmac.new(SECRET_KEY.encode("utf-8"), payload, hashlib.sha256).hexdigest()
+
+
+def verify_login_code(email: str, code: str, expected_hash: str) -> bool:
+    actual_hash = hash_login_code(email=email, code=code)
+    return hmac.compare_digest(actual_hash, expected_hash)
 
 
 def decode_access_token(token: str) -> dict:

@@ -18,12 +18,28 @@ class User(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
-    password_hash: Mapped[str] = mapped_column(String(255))
+    password_hash: Mapped[str] = mapped_column(String(255), default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     exercises: Mapped[list["Exercise"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     measurements: Mapped[list["Measurement"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     workouts: Mapped[list["Workout"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    login_codes: Mapped[list["LoginCode"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+
+
+class LoginCode(Base):
+    __tablename__ = "login_codes"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    email: Mapped[str] = mapped_column(String(255), index=True)
+    code_hash: Mapped[str] = mapped_column(String(255))
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    consumed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+
+    user: Mapped["User"] = relationship(back_populates="login_codes")
 
 
 class Exercise(Base):

@@ -23,6 +23,22 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=6, max_length=128)
 
 
+class RequestLoginCodeRequest(BaseModel):
+    email: str = Field(min_length=3, max_length=255)
+
+
+class VerifyLoginCodeRequest(BaseModel):
+    email: str = Field(min_length=3, max_length=255)
+    code: str = Field(min_length=4, max_length=12)
+
+
+class LoginCodeResponse(BaseModel):
+    sent: bool = True
+    expires_in_seconds: int
+    next_request_in_seconds: int
+    debug_code: str | None = None
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

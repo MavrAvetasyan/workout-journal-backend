@@ -11,6 +11,7 @@
 - `docker-compose.server.yaml` для своего сервера
 - GitHub Actions для сборки и публикации образа в GHCR
 - JWT-авторизация
+- вход по одноразовому коду из email
 - sync endpoint для Flutter-клиента
 
 ## API
@@ -21,6 +22,8 @@
 - `http://127.0.0.1:8000/docs`
 - `http://127.0.0.1:8000/api/auth/register`
 - `http://127.0.0.1:8000/api/auth/login`
+- `http://127.0.0.1:8000/api/auth/request-code`
+- `http://127.0.0.1:8000/api/auth/verify-code`
 - `http://127.0.0.1:8000/api/sync`
 
 ## Локальный запуск без Docker
@@ -132,6 +135,17 @@ docker compose -f docker-compose.server.yaml up -d
 - `SECRET_KEY`
 - `CORS_ORIGINS`
 - `STATIC_DIR`
+- `MAIL_PROVIDER`
+- `MAIL_FROM`
+- `MAIL_REPLY_TO`
+- `RESEND_API_KEY`
+- `APP_NAME`
+- `APP_LOGIN_URL`
+- `LOGIN_CODE_TTL_MINUTES`
+- `LOGIN_CODE_LENGTH`
+- `LOGIN_CODE_RESEND_SECONDS`
+- `LOGIN_CODE_MAX_ATTEMPTS`
+- `DEBUG_AUTH_CODES`
 
 ### Для server compose
 
@@ -146,6 +160,6 @@ docker compose -f docker-compose.server.yaml up -d
 Следующие шаги по проекту:
 
 1. подключить Flutter mobile к постоянному backend
-2. перевести вход с пароля на код по email
-3. добавить SMTP и одноразовые коды верификации
+2. подключить реальный почтовый домен и выключить `DEBUG_AUTH_CODES`
+3. довести красивый production-шаблон письма под бренд
 4. настроить автообновление на своем сервере
